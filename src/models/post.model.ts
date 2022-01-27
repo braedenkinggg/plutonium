@@ -1,9 +1,11 @@
 import mongoose from 'mongoose';
 
-import PostDocument from '../interfaces/post.interface';
-
-const postSchema = new mongoose.Schema<PostDocument>(
+const postSchema = new mongoose.Schema(
     {
+        author: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'users',
+        },
         title: {
             type: String,
             required: true
@@ -12,11 +14,14 @@ const postSchema = new mongoose.Schema<PostDocument>(
             type: String,
             required: true
         },
-        tags: [String],
-        sources: [String],
+        category: {
+            type: String,
+            default: 'General'
+        }
     },
     { timestamps: true }
 );
 
 const PostModel = mongoose.model('posts', postSchema);
+
 export default PostModel;

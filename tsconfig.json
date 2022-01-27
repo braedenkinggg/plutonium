@@ -10,8 +10,11 @@
         "forceConsistentCasingInFileNames": true,
         "strict": true,
         "strictPropertyInitialization": false,
-        "typeRoots": ["./node_modules/@types"],
         "skipLibCheck": true,
         "noImplicitAny": true,
+        "typeRoots": [
+            "/src/types",
+            "/node_modules"
+        ]
     }
 }

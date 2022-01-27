@@ -1,47 +1,35 @@
+/*
+    User controller handles
+    reading, updating, and 
+    deleting users.
+*/
+
 import { Request, Response, NextFunction } from 'express';
+
+import UserModel from '../models/user.model';
 
 import HttpError from '../utils/exceptions/HttpError';
 
-import UserModel from '../models/user.model';
-import PostModel from '../models/post.model';
+class Users {
 
-class UserController {
-
-    public static getUserByUsername = async (req: Request, res: Response, next: NextFunction) => {
-        const { username } = req.params;
-
+    public static getByUsername = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const user = await UserModel.findOne({ username });
+            const user = await UserModel.findOne({ username: req.params.username})
+                .populate('posts', 'title content category');
+            
             if (!user) {
-                return next(new HttpError(404, `Could not find @${username}`));
+                return next(new HttpError(404, 'User not found'));
             }
-
-            return res.status(200).json({
-                user: {
-                    fullName: user.fullName,
-                    username: user.username
-                },
-                session: req.session
+            
+            res.status(200).json({
+                username: user.username,
+                fullName: user.fullName,
+                posts: user.posts
             });
-        } catch (error: any) {
-            next(error);
-        }
-    }
-
-    public static getUserPosts = async (req: Request, res: Response, next: NextFunction) => {
-        const { username } = req.params;
-
-        try {
-            const userPosts = await PostModel.find({ author: { username: username } });
-            if (userPosts.length === 0) {
-                return next(new HttpError(404, 'This user has no posts'));
-            }
-
-            res.status(200).json(userPosts);
-        } catch (error) {
-            next(error);
+        } catch (err: any) {
+            next(err);
         }
     }
 }
 
-export default UserController;
+export default Users;

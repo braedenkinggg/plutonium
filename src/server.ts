@@ -1,6 +1,10 @@
+/*
+    Main server file
+*/
+
 import App from './app';
 
-const app = new App();
+const server = new App();
 
 process.on('uncaughtException', error => {
     console.log('Uncaught Exception!', error);
@@ -12,4 +16,4 @@ process.on('unhandledRejection', error => {
     process.exit(1);
 });
 
-app.listen();
+server.listen();
