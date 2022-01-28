@@ -1,14 +1,18 @@
-import mongoose from 'mongoose';
+import { Schema, Document, model } from 'mongoose';
 import argon2 from 'argon2';
 
-interface UserDocument extends mongoose.Document {
+import { IPost } from './post.model';
+
+export interface IUser extends Document {
     username: string;
-    fullName?: string;
     email: string;
+    fullName: string;
     password: string;
+    posts: [IPost];
+    verifyPassword(requestPassword: string): Promise<boolean>;
 }
 
-const UserSchema = new mongoose.Schema(
+export const UserSchema = new Schema(
     {
         username: {
             type: String,
@@ -28,7 +32,7 @@ const UserSchema = new mongoose.Schema(
             required: true
         },
         posts: [{
-            type: mongoose.Schema.Types.ObjectId,
+            type: Schema.Types.ObjectId,
             ref: 'posts'
         }]
     }, 
@@ -37,7 +41,7 @@ const UserSchema = new mongoose.Schema(
     }
 );
 
-UserSchema.pre<UserDocument>('save', async function(next) {
+UserSchema.pre<IUser>('save', async function(next) {
     if (!this.isModified('password')) return next();
 
     const hashedPassword = await argon2.hash(this.password);
@@ -55,6 +59,5 @@ UserSchema.methods.verifyPassword = async function(requestPassword: string) {
     }
 }
 
-const UserModel = mongoose.model('users', UserSchema);
-
-export default UserModel;
+const User = model<IUser>('users', UserSchema);
+export default User;

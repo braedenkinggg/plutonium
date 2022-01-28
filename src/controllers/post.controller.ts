@@ -6,14 +6,13 @@
 
 import { Request, Response, NextFunction } from 'express';
 
-import PostModel from '../models/post.model';
 import UserModel from '../models/user.model';
-
+import PostModel from '../models/post.model';
 import HttpError from '../utils/exceptions/HttpError';
 
-class Posts {
+export default class PostController {
 
-    public static create = async (req: Request, res: Response, next: NextFunction) => {
+    public static async createPost(req: Request, res: Response, next: NextFunction) {
         try {
             const newPost = await PostModel.create({
                 author: req.session.userId,
@@ -23,16 +22,16 @@ class Posts {
             });
 
             const postAuthor = await UserModel.findById(req.session.userId);
-            postAuthor.posts.push(newPost._id);
-            postAuthor.save();
+            postAuthor!.posts.push(newPost._id);
+            postAuthor!.save();
 
-            res.redirect(`/post/${newPost._id}`);
+            res.redirect(`/posts/${newPost.id}`);
         } catch (err: any) {
             return next(err);
         }
     }
 
-    public static getAll = async (req: Request, res: Response, next: NextFunction) => {
+    public static async getAllPosts(req: Request, res: Response, next: NextFunction) {
         try {
             const posts = await PostModel.find()
                 .populate('author', 'username');
@@ -47,7 +46,7 @@ class Posts {
         }
     }
 
-    public static getById = async (req: Request, res: Response, next: NextFunction) => {
+    public static async getPost(req: Request, res: Response, next: NextFunction) {
         try {
             const post = await PostModel.findById(req.params.postId)
                 .populate('author', 'username');
@@ -57,7 +56,7 @@ class Posts {
             }
 
             res.status(200).json({
-                author: post.author.username,
+                author: post.author,
                 title: post.title,
                 content: post.content,
                 category: post.category
@@ -67,7 +66,7 @@ class Posts {
         }
     }
 
-    public static update = async (req: Request, res: Response, next: NextFunction) => {
+    public static async updatePost(req: Request, res: Response, next: NextFunction) {
         try {
             await PostModel.findByIdAndUpdate(req.params.postId, {
                 title: req.body.title,
@@ -81,11 +80,12 @@ class Posts {
         }
     }
 
-    public static delete = async (req: Request, res: Response, next: NextFunction) => {
-        await PostModel.findByIdAndDelete(req.params.postId);
-        
-        res.redirect('/');
+    public static async deletePost(req: Request, res: Response, next: NextFunction) {
+        try {
+            await PostModel.findByIdAndDelete(req.params.postId);
+            res.redirect('/');
+        } catch (err: any) {
+            next(err);
+        }
     }
 }
-
-export default Posts;

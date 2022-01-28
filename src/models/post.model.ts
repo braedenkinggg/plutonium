@@ -1,9 +1,18 @@
-import mongoose from 'mongoose';
+import { Schema, Document, model } from 'mongoose';
 
-const postSchema = new mongoose.Schema(
+import { IUser } from './user.model';
+
+export interface IPost extends Document {
+    author: IUser;
+    title: string;
+    content: string;
+    category: string;
+}
+
+export const PostSchema = new Schema(
     {
         author: {
-            type: mongoose.Schema.Types.ObjectId,
+            type: Schema.Types.ObjectId,
             ref: 'users',
         },
         title: {
@@ -19,9 +28,10 @@ const postSchema = new mongoose.Schema(
             default: 'General'
         }
     },
-    { timestamps: true }
+    { 
+        timestamps: true 
+    }
 );
 
-const PostModel = mongoose.model('posts', postSchema);
-
+const PostModel = model<IPost>('posts', PostSchema);
 export default PostModel;

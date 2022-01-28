@@ -1,12 +1,10 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const mongoose_1 = __importDefault(require("mongoose"));
-const postSchema = new mongoose_1.default.Schema({
+exports.PostSchema = void 0;
+const mongoose_1 = require("mongoose");
+exports.PostSchema = new mongoose_1.Schema({
     author: {
-        type: mongoose_1.default.Schema.Types.ObjectId,
+        type: mongoose_1.Schema.Types.ObjectId,
         ref: 'users',
     },
     title: {
@@ -21,6 +19,8 @@ const postSchema = new mongoose_1.default.Schema({
         type: String,
         default: 'General'
     }
-}, { timestamps: true });
-const PostModel = mongoose_1.default.model('posts', postSchema);
+}, {
+    timestamps: true
+});
+const PostModel = (0, mongoose_1.model)('posts', exports.PostSchema);
 exports.default = PostModel;

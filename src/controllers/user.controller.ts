@@ -7,12 +7,11 @@
 import { Request, Response, NextFunction } from 'express';
 
 import UserModel from '../models/user.model';
-
 import HttpError from '../utils/exceptions/HttpError';
 
-class Users {
+export default class UserController {
 
-    public static getByUsername = async (req: Request, res: Response, next: NextFunction) => {
+    public static async getUser(req: Request, res: Response, next: NextFunction) {
         try {
             const user = await UserModel.findOne({ username: req.params.username})
                 .populate('posts', 'title content category');
@@ -31,5 +30,3 @@ class Users {
         }
     }
 }
-
-export default Users;

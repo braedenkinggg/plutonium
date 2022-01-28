@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { AnyZodObject } from 'zod';
 
-import HttpError from '../utils/exceptions/HttpError';
+import HttpError from '../../utils/exceptions/HttpError';
 
 function validateSchema(schema: AnyZodObject): RequestHandler {
     return (req: Request, res: Response, next: NextFunction): void => {

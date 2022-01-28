@@ -16,10 +16,10 @@ const cors_1 = __importDefault(require("cors"));
 const auth_controller_1 = __importDefault(require("./controllers/auth.controller"));
 const user_controller_1 = __importDefault(require("./controllers/user.controller"));
 const post_controller_1 = __importDefault(require("./controllers/post.controller"));
-const signupSchema_1 = __importDefault(require("./validation/schemas/signupSchema"));
-const loginSchema_1 = __importDefault(require("./validation/schemas/loginSchema"));
-const postSchema_1 = __importDefault(require("./validation/schemas/postSchema"));
-const validation_1 = __importDefault(require("./validation/validation"));
+const signupSchema_1 = __importDefault(require("./validation/schema/signupSchema"));
+const loginSchema_1 = __importDefault(require("./validation/schema/loginSchema"));
+const postSchema_1 = __importDefault(require("./validation/schema/postSchema"));
+const validateSchema_1 = __importDefault(require("./validation/schema/validateSchema"));
 const errorHandler_1 = __importDefault(require("./middlewares/errorHandler"));
 const HttpError_1 = __importDefault(require("./utils/exceptions/HttpError"));
 class App {
@@ -58,14 +58,14 @@ class App {
         }));
     }
     initRoutes() {
-        this.app.get('/', post_controller_1.default.getAll);
-        this.app.post('/signup', (0, validation_1.default)(signupSchema_1.default), auth_controller_1.default.signup);
-        this.app.post('/login', (0, validation_1.default)(loginSchema_1.default), auth_controller_1.default.login);
-        this.app.post('/new', (0, validation_1.default)(postSchema_1.default), post_controller_1.default.create);
-        this.app.get('/post/:postId', post_controller_1.default.getById);
-        this.app.put('/post/:postId', post_controller_1.default.update);
-        this.app.delete('/post/:postId', post_controller_1.default.delete);
-        this.app.get('/:username', user_controller_1.default.getByUsername);
+        this.app.get('/', post_controller_1.default.getAllPosts);
+        this.app.post('/signup', (0, validateSchema_1.default)(signupSchema_1.default), auth_controller_1.default.signup);
+        this.app.post('/login', (0, validateSchema_1.default)(loginSchema_1.default), auth_controller_1.default.login);
+        this.app.post('/posts/new', (0, validateSchema_1.default)(postSchema_1.default), post_controller_1.default.createPost);
+        this.app.get('/posts/:postId', post_controller_1.default.getPost);
+        this.app.put('/posts/:postId', post_controller_1.default.updatePost);
+        this.app.delete('/posts/:postId', post_controller_1.default.deletePost);
+        this.app.get('/:username', user_controller_1.default.getUser);
     }
     handleErrors() {
         this.app.use('*', (req, res, next) => {
@@ -75,7 +75,9 @@ class App {
     }
     connectDb() {
         mongoose_1.default.connect(process.env.MONGO_URI)
-            .then(() => console.log('Succesfully connected to DB'))
+            .then(() => {
+            console.log('Succesfully connected to DB');
+        })
             .catch((error) => {
             console.log(error);
             process.exit(1);
