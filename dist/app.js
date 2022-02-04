@@ -11,17 +11,13 @@ const express_1 = __importDefault(require("express"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const express_session_1 = __importDefault(require("express-session"));
 const connect_mongo_1 = __importDefault(require("connect-mongo"));
+const helmet_1 = __importDefault(require("helmet"));
 const morgan_1 = __importDefault(require("morgan"));
 const cors_1 = __importDefault(require("cors"));
-const auth_controller_1 = __importDefault(require("./controllers/auth.controller"));
-const user_controller_1 = __importDefault(require("./controllers/user.controller"));
-const post_controller_1 = __importDefault(require("./controllers/post.controller"));
-const signupSchema_1 = __importDefault(require("./validation/schema/signupSchema"));
-const loginSchema_1 = __importDefault(require("./validation/schema/loginSchema"));
-const postSchema_1 = __importDefault(require("./validation/schema/postSchema"));
-const validateSchema_1 = __importDefault(require("./validation/schema/validateSchema"));
+const path_1 = __importDefault(require("path"));
 const errorHandler_1 = __importDefault(require("./middlewares/errorHandler"));
-const HttpError_1 = __importDefault(require("./utils/exceptions/HttpError"));
+const ApiError_1 = __importDefault(require("./utils/exceptions/ApiError"));
+const routes_1 = __importDefault(require("./routes/routes"));
 class App {
     constructor() {
         this.app = (0, express_1.default)();
@@ -36,15 +32,17 @@ class App {
         });
     }
     config() {
+        this.app.use((0, helmet_1.default)());
         this.app.use((0, morgan_1.default)('dev'));
         this.app.use(express_1.default.json());
+        this.app.use(express_1.default.static(path_1.default.join(__dirname, '../public')));
         this.app.use(express_1.default.urlencoded({ extended: true }));
         this.app.use((0, cors_1.default)({
             origin: 'http://localhost:3000/',
             credentials: true
         }));
         this.app.use((0, express_session_1.default)({
-            name: 'sid',
+            name: process.env.SESSION_NAME,
             secret: process.env.SESSION_SECRET,
             resave: false,
             saveUninitialized: false,
@@ -52,24 +50,19 @@ class App {
             cookie: {
                 path: '/',
                 httpOnly: true,
-                secure: false,
+                secure: process.env.NODE_ENV === 'prod' ? true : false,
                 sameSite: true
             }
         }));
+        this.app.set('view engine', 'ejs');
+        this.app.set('views', path_1.default.join(__dirname, '../views'));
     }
     initRoutes() {
-        this.app.get('/', post_controller_1.default.getAllPosts);
-        this.app.post('/signup', (0, validateSchema_1.default)(signupSchema_1.default), auth_controller_1.default.signup);
-        this.app.post('/login', (0, validateSchema_1.default)(loginSchema_1.default), auth_controller_1.default.login);
-        this.app.post('/posts/new', (0, validateSchema_1.default)(postSchema_1.default), post_controller_1.default.createPost);
-        this.app.get('/posts/:postId', post_controller_1.default.getPost);
-        this.app.put('/posts/:postId', post_controller_1.default.updatePost);
-        this.app.delete('/posts/:postId', post_controller_1.default.deletePost);
-        this.app.get('/:username', user_controller_1.default.getUser);
+        this.app.use(routes_1.default);
     }
     handleErrors() {
         this.app.use('*', (req, res, next) => {
-            next(new HttpError_1.default(404, 'Page Not Found...'));
+            return next(new ApiError_1.default(404, 'Page not found'));
         });
         this.app.use(errorHandler_1.default);
     }

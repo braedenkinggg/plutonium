@@ -7,6 +7,8 @@ export interface IUser extends Document {
     username: string;
     email: string;
     fullName: string;
+    biography: string;
+    link: string;
     password: string;
     posts: [IPost];
     verifyPassword(requestPassword: string): Promise<boolean>;
@@ -20,6 +22,12 @@ export const UserSchema = new Schema(
             unique: true
         },
         fullName: {
+            type: String,
+        },
+        biography: {
+            type: String
+        },
+        link: {
             type: String,
         },
         email: {
@@ -42,8 +50,10 @@ export const UserSchema = new Schema(
 );
 
 UserSchema.pre<IUser>('save', async function(next) {
-    if (!this.isModified('password')) return next();
-
+    if (!this.isModified('password')) {
+        return next();
+    }
+    
     const hashedPassword = await argon2.hash(this.password);
     this.password = hashedPassword;
 
@@ -60,4 +70,5 @@ UserSchema.methods.verifyPassword = async function(requestPassword: string) {
 }
 
 const User = model<IUser>('users', UserSchema);
+
 export default User;

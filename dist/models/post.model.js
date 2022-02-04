@@ -22,5 +22,5 @@ exports.PostSchema = new mongoose_1.Schema({
 }, {
     timestamps: true
 });
-const PostModel = (0, mongoose_1.model)('posts', exports.PostSchema);
-exports.default = PostModel;
+const Post = (0, mongoose_1.model)('posts', exports.PostSchema);
+exports.default = Post;

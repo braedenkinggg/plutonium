@@ -1,4 +1,4 @@
-class HttpError extends Error {
+export default class ApiError extends Error {
     public statusCode;
 
     constructor(statusCode: number, message: string) {
@@ -7,5 +7,3 @@ class HttpError extends Error {
         this.message = message;
     }
 }
-
-export default HttpError;

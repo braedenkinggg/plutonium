@@ -15,6 +15,12 @@ exports.UserSchema = new mongoose_1.Schema({
     fullName: {
         type: String,
     },
+    biography: {
+        type: String
+    },
+    link: {
+        type: String,
+    },
     email: {
         type: String,
         required: true,
@@ -32,8 +38,9 @@ exports.UserSchema = new mongoose_1.Schema({
     timestamps: true
 });
 exports.UserSchema.pre('save', async function (next) {
-    if (!this.isModified('password'))
+    if (!this.isModified('password')) {
         return next();
+    }
     const hashedPassword = await argon2_1.default.hash(this.password);
     this.password = hashedPassword;
     return next();

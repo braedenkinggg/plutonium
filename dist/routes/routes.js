@@ -1,0 +1,26 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const sessionAuth_1 = __importDefault(require("../middlewares/sessionAuth"));
+const validateSchema_1 = __importDefault(require("../validation/validateSchema"));
+const signupSchema_1 = __importDefault(require("../validation/schemas/signupSchema"));
+const loginSchema_1 = __importDefault(require("../validation/schemas/loginSchema"));
+const postSchema_1 = __importDefault(require("../validation/schemas/postSchema"));
+const userSchema_1 = __importDefault(require("../validation/schemas/userSchema"));
+const auth_controller_1 = __importDefault(require("../controllers/auth.controller"));
+const user_controller_1 = __importDefault(require("../controllers/user.controller"));
+const post_controller_1 = __importDefault(require("../controllers/post.controller"));
+const router = (0, express_1.Router)();
+router.post('/signup', (0, validateSchema_1.default)(signupSchema_1.default), auth_controller_1.default.signup);
+router.post('/login', (0, validateSchema_1.default)(loginSchema_1.default), auth_controller_1.default.login);
+router.post('/logout', auth_controller_1.default.logout);
+router.get('/', post_controller_1.default.getPosts);
+router.post('/post/new', sessionAuth_1.default, (0, validateSchema_1.default)(postSchema_1.default), post_controller_1.default.createPost);
+router.get('/post/:postId', post_controller_1.default.getPost);
+router.put('/post/:postId', sessionAuth_1.default, (0, validateSchema_1.default)(postSchema_1.default), post_controller_1.default.updatePost);
+router.get('/:username', user_controller_1.default.getUser);
+router.put('/:username', sessionAuth_1.default, (0, validateSchema_1.default)(userSchema_1.default), user_controller_1.default.updateUser);
+exports.default = router;

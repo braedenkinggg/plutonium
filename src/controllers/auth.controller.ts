@@ -1,52 +1,62 @@
-/*
-    Auth controller handles
-    creating, updating, and
-    deleting sessions as well
-    as creating users.
-*/ 
-
 import { Request, Response, NextFunction } from 'express';
 
-import UserModel from '../models/user.model';
-import HttpError from '../utils/exceptions/HttpError';
+import User from '../models/user.model';
+import ApiError from '../utils/exceptions/ApiError';
 
 export default class AuthController {
-    
-    public static async signup(req: Request, res: Response, next: NextFunction) {
-        const userData = req.body;
 
+    public static signup = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const newUser = await UserModel.create({
-                ...userData,
-                username: userData.username.toLowerCase(),
-                email: userData.email.toLowerCase()
+            const user = await User.create({
+                username: req.body.username.toLowerCase(),
+                email: req.body.email.toLowerCase(),
+                ...req.body
             });
 
-            req.session.userId = newUser._id;
-            res.redirect(`/${newUser.username}`);
+            req.session.userId = user.id;
+            res.redirect('/');
         } catch(err: any) {
             if(err.code === 11000) {
-                return next(new HttpError(409, 'User already exists!'));
+                return next(new ApiError(409, 'User already exists'));
             }
 
             next(err);
         }
     }
 
-    public static async login(req: Request, res: Response, next: NextFunction) {
+    public static login = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const user = await UserModel.findOne({ username: req.body.username });
-            if (!user) {
-                return next(new HttpError(404, 'User does not exist'));
-            }
+            const user = await User.findOne({ 
+                username: req.body.username 
+            });
+            
+            if (!user) return next();
 
             const validPassword = await user.verifyPassword(req.body.password);
+
             if (!validPassword) {
-                return next(new HttpError(400, 'Incorrect Password!'));
+                return next(new ApiError(400, 'Incorrect password'));
             }
 
-            req.session.userId = user._id;
-            res.redirect(`/${user.username}`);
+            req.session.userId = user.id;
+            res.redirect('/');
+        } catch (err: any) {
+            next(err);
+        }
+    }
+
+    public static logout = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            await req.session.destroy((err: any) => {
+                if (err) {
+                    return new ApiError(500, 'Could not log out at this time');
+                }
+
+                res.clearCookie('sid');
+                res.status(200).json({ 
+                    sucess: 'sucessfully logged out user' 
+                });
+            });
         } catch (err: any) {
             next(err);
         }

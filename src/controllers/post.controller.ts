@@ -1,44 +1,34 @@
-/* 
-    Post controller handles
-    creating, reading, updating,
-    and deleting posts. 
-*/
-
 import { Request, Response, NextFunction } from 'express';
 
-import UserModel from '../models/user.model';
-import PostModel from '../models/post.model';
-import HttpError from '../utils/exceptions/HttpError';
+import User from '../models/user.model';
+import Post from '../models/post.model';
+import ApiError from '../utils/exceptions/ApiError';
 
 export default class PostController {
 
-    public static async createPost(req: Request, res: Response, next: NextFunction) {
+    public static createPost = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const newPost = await PostModel.create({
-                author: req.session.userId,
-                title: req.body.title,
-                content: req.body.content,
-                category: req.body.category
+            const post = await Post.create({ 
+                author: req.session.userId, 
+                ...req.body
             });
 
-            const postAuthor = await UserModel.findById(req.session.userId);
-            postAuthor!.posts.push(newPost._id);
-            postAuthor!.save();
+            const author = await User.findById(req.session.userId);
+            author!.posts.push(post.id);
+            author!.save();
 
-            res.redirect(`/posts/${newPost.id}`);
+            res.redirect(`/post/${post.id}`);
         } catch (err: any) {
             return next(err);
         }
     }
 
-    public static async getAllPosts(req: Request, res: Response, next: NextFunction) {
+    public static getPosts = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const posts = await PostModel.find()
+            const posts = await Post.find()
                 .populate('author', 'username');
 
-            if (posts.length === 0) {
-                return next(new HttpError(404, 'No posts yet...'));
-            }
+            if (!posts.length) return next();
 
             res.status(200).json(posts);
         } catch (error: any) {
@@ -46,44 +36,36 @@ export default class PostController {
         }
     }
 
-    public static async getPost(req: Request, res: Response, next: NextFunction) {
+    public static getPost = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const post = await PostModel.findById(req.params.postId)
+            const post = await Post.findById(req.params.postId)
                 .populate('author', 'username');
 
-            if (!post) {
-                return next(new HttpError(404, 'This post does not exist!'));
-            }
+            if (!post) return next();
 
-            res.status(200).json({
-                author: post.author,
-                title: post.title,
-                content: post.content,
-                category: post.category
-            });
+            res.status(200).json(post);
         } catch (err: any) {
             next(err);
         }
     }
 
-    public static async updatePost(req: Request, res: Response, next: NextFunction) {
+    public static updatePost = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            await PostModel.findByIdAndUpdate(req.params.postId, {
+            const post = await Post.findById(req.params.postId)
+                .populate('author', 'id');
+
+            if (!post) return next();
+            if (req.session.userId !== post.author.id) {
+                return next(new ApiError(403, 'Forbidden'));
+            }
+
+            await post.updateOne({
                 title: req.body.title,
                 content: req.body.content,
                 category: req.body.category
             });
-
-            res.redirect('/');
-        } catch (err: any) {
-            next(err);
-        }
-    }
-
-    public static async deletePost(req: Request, res: Response, next: NextFunction) {
-        try {
-            await PostModel.findByIdAndDelete(req.params.postId);
-            res.redirect('/');
+                
+            res.redirect(`/post/${post.id}`);
         } catch (err: any) {
             next(err);
         }

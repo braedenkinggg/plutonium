@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 
-import HttpError from '../utils/exceptions/HttpError';
+import ApiError from '../utils/exceptions/ApiError';
 
-function handleErrors(err: any, req: Request, res: Response, next: NextFunction) {
-    if (err instanceof HttpError) {
+export default function errorHandler(err: any, req: Request, res: Response, next: NextFunction) {
+    if (err instanceof ApiError) {
         return res.status(err.statusCode).json({
             error: true,
             statusCode: err.statusCode,
@@ -17,5 +17,3 @@ function handleErrors(err: any, req: Request, res: Response, next: NextFunction)
         message: err.message
     });
 }
-
-export default handleErrors;

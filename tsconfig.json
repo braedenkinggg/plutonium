@@ -12,6 +12,10 @@
         "strictPropertyInitialization": false,
         "skipLibCheck": true,
         "noImplicitAny": true,
+        "types": [
+            "@types/node",
+            "@types/jest"
+        ],
         "typeRoots": [
             "/src/types",
             "/node_modules"
