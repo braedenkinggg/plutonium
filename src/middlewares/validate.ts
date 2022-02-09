@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { AnyZodObject } from 'zod';
 
-import ApiError from '../utils/exceptions/ApiError';
+import ApiError from '../utils/errors/ApiError';
 
-function validateSchema(schema: AnyZodObject): RequestHandler {
+function validate(schema: AnyZodObject): RequestHandler {
     return (req: Request, res: Response, next: NextFunction): void => {
         try {
             schema.parse({
@@ -19,4 +19,4 @@ function validateSchema(schema: AnyZodObject): RequestHandler {
     }
 }
 
-export default validateSchema;
+export default validate;

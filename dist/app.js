@@ -1,7 +1,4 @@
 "use strict";
-/*
-    Main App file
-*/
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -14,9 +11,8 @@ const connect_mongo_1 = __importDefault(require("connect-mongo"));
 const helmet_1 = __importDefault(require("helmet"));
 const morgan_1 = __importDefault(require("morgan"));
 const cors_1 = __importDefault(require("cors"));
-const path_1 = __importDefault(require("path"));
 const errorHandler_1 = __importDefault(require("./middlewares/errorHandler"));
-const ApiError_1 = __importDefault(require("./utils/exceptions/ApiError"));
+const ApiError_1 = __importDefault(require("./utils/errors/ApiError"));
 const routes_1 = __importDefault(require("./routes/routes"));
 class App {
     constructor() {
@@ -35,7 +31,6 @@ class App {
         this.app.use((0, helmet_1.default)());
         this.app.use((0, morgan_1.default)('dev'));
         this.app.use(express_1.default.json());
-        this.app.use(express_1.default.static(path_1.default.join(__dirname, '../public')));
         this.app.use(express_1.default.urlencoded({ extended: true }));
         this.app.use((0, cors_1.default)({
             origin: 'http://localhost:3000/',
@@ -54,8 +49,6 @@ class App {
                 sameSite: true
             }
         }));
-        this.app.set('view engine', 'ejs');
-        this.app.set('views', path_1.default.join(__dirname, '../views'));
     }
     initRoutes() {
         this.app.use(routes_1.default);
@@ -68,11 +61,9 @@ class App {
     }
     connectDb() {
         mongoose_1.default.connect(process.env.MONGO_URI)
-            .then(() => {
-            console.log('Succesfully connected to DB');
-        })
-            .catch((error) => {
-            console.log(error);
+            .then(() => console.log('Succesfully connected to DB'))
+            .catch((err) => {
+            console.log(err);
             process.exit(1);
         });
     }

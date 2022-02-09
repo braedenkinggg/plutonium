@@ -13,14 +13,13 @@ exports.PostSchema = new mongoose_1.Schema({
     },
     content: {
         type: String,
-        required: true
+        required: true,
+        max: 1000
     },
     category: {
         type: String,
         default: 'General'
-    }
-}, {
-    timestamps: true
-});
+    },
+}, { timestamps: true });
 const Post = (0, mongoose_1.model)('posts', exports.PostSchema);
 exports.default = Post;

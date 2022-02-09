@@ -1,7 +1,3 @@
-/*
-    Main App file
-*/
-
 import 'dotenv/config';
 import express from 'express';
 import mongoose from 'mongoose';
@@ -10,10 +6,9 @@ import MongoStore from 'connect-mongo';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import cors from 'cors';
-import path from 'path';
 
 import errorHandler from './middlewares/errorHandler';
-import ApiError from './utils/exceptions/ApiError';
+import ApiError from './utils/errors/ApiError';
 
 import routes from './routes/routes';
 
@@ -38,7 +33,6 @@ class App {
         this.app.use(helmet());
         this.app.use(morgan('dev'));
         this.app.use(express.json());
-        this.app.use(express.static(path.join(__dirname, '../public')));
         this.app.use(express.urlencoded({ extended: true }));
         this.app.use(cors({
             origin: 'http://localhost:3000/',
@@ -58,9 +52,6 @@ class App {
                 sameSite: true
             }
         }));
-
-        this.app.set('view engine', 'ejs');
-        this.app.set('views', path.join(__dirname, '../views'));
     }
 
     private initRoutes(): void {
@@ -77,11 +68,9 @@ class App {
 
     private connectDb(): void {
         mongoose.connect(process.env.MONGO_URI!)
-            .then(() => {
-                console.log('Succesfully connected to DB')
-            })
-            .catch((error) => {
-                console.log(error);
+            .then(() => console.log('Succesfully connected to DB'))
+            .catch((err: any) => {
+                console.log(err);
                 process.exit(1);
             });
     }

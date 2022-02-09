@@ -1,34 +1,32 @@
 import { Request, Response, NextFunction } from 'express';
 
-import User from '../models/user.model';
 import Post from '../models/post.model';
-import ApiError from '../utils/exceptions/ApiError';
+import ApiError from '../utils/errors/ApiError';
 
-export default class PostController {
+class PostController {
 
-    public static createPost = async (req: Request, res: Response, next: NextFunction) => {
+    public static async createPost(req: Request, res: Response, next: NextFunction) {
+        const { title, content, category } = req.body;
+
+        const newPost = new Post({ 
+            author: req.session.userId, 
+            title,
+            content,
+            category
+        });
+
         try {
-            const post = await Post.create({ 
-                author: req.session.userId, 
-                ...req.body
-            });
-
-            const author = await User.findById(req.session.userId);
-            author!.posts.push(post.id);
-            author!.save();
-
-            res.redirect(`/post/${post.id}`);
+            const post = await newPost.save();
+            res.status(201).json(post);
         } catch (err: any) {
             return next(err);
         }
     }
 
-    public static getPosts = async (req: Request, res: Response, next: NextFunction) => {
+    public static async getPosts(req: Request, res: Response, next: NextFunction) {
         try {
             const posts = await Post.find()
-                .populate('author', 'username');
-
-            if (!posts.length) return next();
+                .populate('author', '-password');
 
             res.status(200).json(posts);
         } catch (error: any) {
@@ -36,12 +34,14 @@ export default class PostController {
         }
     }
 
-    public static getPost = async (req: Request, res: Response, next: NextFunction) => {
+    public static async getPost(req: Request, res: Response, next: NextFunction) {
         try {
-            const post = await Post.findById(req.params.postId)
-                .populate('author', 'username');
+            const post = await Post.findById(req.params.id)
+                .populate('author', '-password');
 
-            if (!post) return next();
+            if (!post) {
+                return next(new ApiError(404, 'Post not found'));
+            }
 
             res.status(200).json(post);
         } catch (err: any) {
@@ -49,25 +49,45 @@ export default class PostController {
         }
     }
 
-    public static updatePost = async (req: Request, res: Response, next: NextFunction) => {
+    public static async updatePost(req: Request, res: Response, next: NextFunction) {
         try {
-            const post = await Post.findById(req.params.postId)
-                .populate('author', 'id');
+            const post = await Post.findById(req.params.id)
+                .populate('author', '-password');
 
-            if (!post) return next();
-            if (req.session.userId !== post.author.id) {
-                return next(new ApiError(403, 'Forbidden'));
+            if (!post) {
+                return next(new ApiError(404, 'Post not found'));
             }
 
-            await post.updateOne({
-                title: req.body.title,
-                content: req.body.content,
-                category: req.body.category
-            });
-                
-            res.redirect(`/post/${post.id}`);
+            if (post.author.id !== req.session.userId) {
+                return next(new ApiError(403, 'Cannot edit other users posts'));
+            }
+
+            await post.updateOne({ $set: req.body });
+            res.status(200).json('Successfully updated post');
         } catch (err: any) {
-            next(err);
+            return next(err);
+        }
+    }
+
+    public static async deletePost(req: Request, res: Response, next: NextFunction) {
+        try {
+            const post = await Post.findById(req.params.id)
+                .populate('author');
+
+            if (!post) {
+                return next(new ApiError(404, 'Post not found'));
+            }
+
+            if (post.author.id !== req.session.userId) {
+                return next(new ApiError(403, 'Cannot delete other users posts'));
+            }
+
+            await post.deleteOne();
+            res.status(200).json('The post has been deleted');
+        } catch (err: any) {
+            return next(err);
         }
     }
 }
+
+export default PostController;

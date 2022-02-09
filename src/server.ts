@@ -1,7 +1,3 @@
-/*
-    Main server file
-*/
-
 import App from './app';
 
 const server = new App();

@@ -15,24 +15,26 @@ export const PostSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: 'users',
         },
+
         title: {
             type: String,
             required: true
         },
+
         content: {
             type: String,
-            required: true
+            required: true,
+            max: 1000
         },
+
         category: {
             type: String,
             default: 'General'
-        }
+        },
     },
-    { 
-        timestamps: true 
-    }
+
+    { timestamps: true }
 );
 
 const Post = model<IPost>('posts', PostSchema);
-
 export default Post;
