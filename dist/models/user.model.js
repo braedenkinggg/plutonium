@@ -32,8 +32,8 @@ exports.userSchema = new mongoose_1.Schema({
         type: String
     }
 }, {
-    toJSON: { virtuals: true },
-    timestamps: true
+    timestamps: true,
+    toJSON: { virtuals: true }
 });
 exports.userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) {
@@ -55,8 +55,7 @@ exports.userSchema.methods.verifyPassword = async function (clientPassword) {
 exports.userSchema.virtual('posts', {
     ref: 'posts',
     localField: '_id',
-    foreignField: 'author',
-    justOne: true
+    foreignField: 'author'
 });
 const User = (0, mongoose_1.model)('users', exports.userSchema);
 exports.default = User;

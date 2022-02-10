@@ -6,15 +6,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const ApiError_1 = __importDefault(require("../utils/errors/ApiError"));
 function errorHandler(err, req, res, next) {
     if (err instanceof ApiError_1.default) {
-        return res.status(err.statusCode).json({
+        return res.status(err.status).json({
             error: true,
-            statusCode: err.statusCode,
+            status: err.status,
             message: err.message
         });
     }
     res.status(500).json({
         error: true,
-        statusCode: 500,
+        status: 500,
         message: 'Internal Server Error'
     });
 }

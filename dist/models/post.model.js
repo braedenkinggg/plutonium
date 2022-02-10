@@ -6,6 +6,7 @@ exports.PostSchema = new mongoose_1.Schema({
     author: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: 'users',
+        required: true
     },
     title: {
         type: String,

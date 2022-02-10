@@ -1,14 +1,10 @@
 import { Schema, Document, model } from 'mongoose';
 import argon2 from 'argon2';
 
-import { IPost } from './post.model';
-
 export interface IUser extends Document {
     username: string;
     email: string;
     fullName: string;
-    biography: string;
-    link: string;
     password: string;
     verifyPassword(requestPassword: string): Promise<boolean>;
 }
@@ -43,9 +39,9 @@ export const userSchema = new Schema(
             type: String 
         }
     }, 
-    { 
-        toJSON: { virtuals: true },
-        timestamps: true 
+    {
+        timestamps: true,
+        toJSON: { virtuals: true }
     }
 );
 
@@ -72,8 +68,7 @@ userSchema.methods.verifyPassword = async function(clientPassword: string) {
 userSchema.virtual('posts', {
     ref: 'posts',
     localField: '_id',
-    foreignField: 'author',
-    justOne: true
+    foreignField: 'author'
 });
 
 const User = model<IUser>('users', userSchema);

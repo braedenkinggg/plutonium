@@ -11,9 +11,9 @@ const connect_mongo_1 = __importDefault(require("connect-mongo"));
 const helmet_1 = __importDefault(require("helmet"));
 const morgan_1 = __importDefault(require("morgan"));
 const cors_1 = __importDefault(require("cors"));
+const routes_1 = __importDefault(require("./routes/routes"));
 const errorHandler_1 = __importDefault(require("./middlewares/errorHandler"));
 const ApiError_1 = __importDefault(require("./utils/errors/ApiError"));
-const routes_1 = __importDefault(require("./routes/routes"));
 class App {
     constructor() {
         this.app = (0, express_1.default)();
@@ -37,16 +37,16 @@ class App {
             credentials: true
         }));
         this.app.use((0, express_session_1.default)({
-            name: process.env.SESSION_NAME,
-            secret: process.env.SESSION_SECRET,
+            name: process.env.SESS_NAME,
+            secret: process.env.SESS_SECRET,
             resave: false,
             saveUninitialized: false,
-            store: new connect_mongo_1.default({ mongoUrl: process.env.MONGO_URI }),
+            store: new connect_mongo_1.default({ mongoUrl: process.env.DB_URI }),
             cookie: {
                 path: '/',
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'prod' ? true : false,
-                sameSite: true
+                sameSite: true,
             }
         }));
     }
@@ -60,7 +60,7 @@ class App {
         this.app.use(errorHandler_1.default);
     }
     connectDb() {
-        mongoose_1.default.connect(process.env.MONGO_URI)
+        mongoose_1.default.connect(process.env.DB_URI)
             .then(() => console.log('Succesfully connected to DB'))
             .catch((err) => {
             console.log(err);

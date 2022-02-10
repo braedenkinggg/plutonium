@@ -7,10 +7,9 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import cors from 'cors';
 
+import routes from './routes/routes';
 import errorHandler from './middlewares/errorHandler';
 import ApiError from './utils/errors/ApiError';
-
-import routes from './routes/routes';
 
 class App {
     public app: express.Application;
@@ -40,16 +39,16 @@ class App {
         }));
 
         this.app.use(session({
-            name: process.env.SESSION_NAME!,
-            secret: process.env.SESSION_SECRET!,
+            name: process.env.SESS_NAME!,
+            secret: process.env.SESS_SECRET!,
             resave: false,
             saveUninitialized: false,
-            store: new MongoStore({ mongoUrl: process.env.MONGO_URI! }),
+            store: new MongoStore({ mongoUrl: process.env.DB_URI! }),
             cookie: {
                 path: '/',
                 httpOnly: true,
                 secure: process.env.NODE_ENV! === 'prod' ? true : false,
-                sameSite: true
+                sameSite: true,
             }
         }));
     }
@@ -67,7 +66,7 @@ class App {
     }
 
     private connectDb(): void {
-        mongoose.connect(process.env.MONGO_URI!)
+        mongoose.connect(process.env.DB_URI!)
             .then(() => console.log('Succesfully connected to DB'))
             .catch((err: any) => {
                 console.log(err);

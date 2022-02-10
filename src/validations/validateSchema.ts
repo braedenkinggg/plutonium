@@ -3,10 +3,10 @@ import { AnyZodObject } from 'zod';
 
 import ApiError from '../utils/errors/ApiError';
 
-function validate(schema: AnyZodObject): RequestHandler {
+export default function validateSchema(schema: AnyZodObject): RequestHandler {
     return (req: Request, res: Response, next: NextFunction): void => {
         try {
-            schema.parse({
+            schema.parseAsync({
                 body: req.body,
                 query: req.query,
                 params: req.params
@@ -18,5 +18,3 @@ function validate(schema: AnyZodObject): RequestHandler {
         }
     }
 }
-
-export default validate;

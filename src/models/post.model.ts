@@ -9,11 +9,11 @@ export interface IPost extends Document {
     category: string;
 }
 
-export const PostSchema = new Schema(
-    {
+export const PostSchema = new Schema({
         author: {
             type: Schema.Types.ObjectId,
             ref: 'users',
+            required: true
         },
 
         title: {
@@ -31,10 +31,7 @@ export const PostSchema = new Schema(
             type: String,
             default: 'General'
         },
-    },
-
-    { timestamps: true }
-);
+    }, { timestamps: true });
 
 const Post = model<IPost>('posts', PostSchema);
 export default Post;

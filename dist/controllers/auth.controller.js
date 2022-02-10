@@ -6,16 +6,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const user_model_1 = __importDefault(require("../models/user.model"));
 const ApiError_1 = __importDefault(require("../utils/errors/ApiError"));
 class AuthController {
+    // Signup
     static async signup(req, res, next) {
         const { username, email, password } = req.body;
-        const user = new user_model_1.default({
-            username,
-            email,
-            password
-        });
         try {
-            await user.save();
-            res.status(201).json(user);
+            const newUser = await user_model_1.default.create({
+                username,
+                email,
+                password
+            });
+            res.status(201).json(newUser);
         }
         catch (err) {
             if (err.code === 11000) {
@@ -24,14 +24,17 @@ class AuthController {
             next(err);
         }
     }
+    // Login
     static async login(req, res, next) {
         const { username, password } = req.body;
         try {
             const user = await user_model_1.default.findOne({ username });
+            // Check if user exists
             if (!user) {
                 return next(new ApiError_1.default(404, 'User does not exist'));
             }
             const validPassword = await user.verifyPassword(password);
+            // Check if password is valid
             if (!validPassword) {
                 return next(new ApiError_1.default(400, 'Incorrect password'));
             }
@@ -42,6 +45,7 @@ class AuthController {
             next(err);
         }
     }
+    // Logout
     static async logout(req, res, next) {
         await req.session.destroy(() => {
             try {
