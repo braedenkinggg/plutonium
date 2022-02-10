@@ -7,7 +7,9 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import cors from 'cors';
 
-import routes from './routes/routes';
+import authRouter from './routes/auth.routes';
+import postRouter from './routes/post.routes';
+import userRouter from './routes/user.routes';
 import errorHandler from './middlewares/errorHandler';
 import ApiError from './utils/errors/ApiError';
 
@@ -54,7 +56,9 @@ class App {
     }
 
     private initRoutes(): void {
-        this.app.use(routes);
+        this.app.use('/api/auth', authRouter);
+        this.app.use('/api/posts', postRouter);
+        this.app.use('/api/users', userRouter);
     }
 
     private handleErrors(): void {
