@@ -3,19 +3,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const ApiError_1 = __importDefault(require("../utils/errors/ApiError"));
+const APIError_1 = __importDefault(require("../errors/APIError"));
 function errorHandler(err, req, res, next) {
-    if (err instanceof ApiError_1.default) {
-        return res.status(err.status).json({
+    if (err instanceof APIError_1.default) {
+        return res.status(err.statusCode).json({
             error: true,
-            status: err.status,
-            message: err.message
+            statusCode: err.statusCode,
+            message: err.message,
         });
     }
-    res.status(500).json({
+    return res.status(500).json({
         error: true,
-        status: 500,
-        message: 'Internal Server Error'
+        statusCode: 500,
+        message: 'Internal Server Error',
     });
 }
 exports.default = errorHandler;

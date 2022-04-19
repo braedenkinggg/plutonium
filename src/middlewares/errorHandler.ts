@@ -1,19 +1,20 @@
 import { Request, Response, NextFunction } from 'express';
+import APIError from '../errors/APIError';
 
-import ApiError from '../utils/errors/ApiError';
-
-export default function errorHandler(err: any, req: Request, res: Response, next: NextFunction) {
-    if (err instanceof ApiError) {
-        return res.status(err.status).json({
+function errorHandler(err: any, req: Request, res: Response, next: NextFunction) {
+    if (err instanceof APIError) {
+        return res.status(err.statusCode).json({
             error: true,
-            status: err.status,
-            message: err.message
+            statusCode: err.statusCode,
+            message: err.message,
         });    
     }
     
-    res.status(500).json({
+    return res.status(500).json({
         error: true,
-        status: 500,
-        message: 'Internal Server Error'
+        statusCode: 500,
+        message: 'Internal Server Error',
     });
 }
+
+export default errorHandler;
